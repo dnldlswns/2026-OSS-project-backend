@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import oss.backend.domain.verification.dto.VerificationCompleteRequest;
 import oss.backend.domain.verification.dto.VerificationCompleteResponse;
 import oss.backend.domain.verification.entity.Verification;
-import oss.backend.domain.verification.entity.VerificationStatus;
 import oss.backend.domain.verification.repository.VerificationRepository;
 import oss.backend.infra.portone.PortOneClient;
 import oss.backend.infra.portone.dto.PortOneVerificationResponse;
@@ -42,7 +41,6 @@ public class VerificationService {
                                 .name(customer.name())
                                 .birthDate(customer.birthDate() == null ? null : LocalDate.parse(customer.birthDate()))
                                 .phoneNumber(customer.phoneNumber())
-                                .status(VerificationStatus.VERIFIED)
                                 .verifiedAt(LocalDateTime.now())
                                 .build();
 
