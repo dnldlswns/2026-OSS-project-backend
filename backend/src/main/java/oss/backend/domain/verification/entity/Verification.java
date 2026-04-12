@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,10 +26,10 @@ public class Verification {
         @Column(nullable = false, unique = true, length = 100)
         private String verificationId;
 
-        @Column(nullable = false, unique = true, length = 150)
+        @Column(nullable = false, unique = true, length = 100)
         private String identityVerificationId;
 
-        @Column(nullable = false, unique = true, length = 200)
+        @Column(nullable = false, unique = true, length = 100)
         private String ci;
 
         @Column(length = 200)
@@ -40,14 +38,11 @@ public class Verification {
         @Column(nullable = false, length = 50)
         private String name;
 
+        @Column(nullable = false, length = 20)
         private LocalDate birthDate;
 
         @Column(length = 20)
         private String phoneNumber;
-
-        @Enumerated(EnumType.STRING)
-        @Column(nullable = false, length = 20)
-        private VerificationStatus status;
 
         @Column(nullable = false)
         private LocalDateTime verifiedAt;
@@ -61,7 +56,6 @@ public class Verification {
                         String name,
                         LocalDate birthDate,
                         String phoneNumber,
-                        VerificationStatus status,
                         LocalDateTime verifiedAt) {
                 this.verificationId = verificationId;
                 this.identityVerificationId = identityVerificationId;
@@ -70,11 +64,6 @@ public class Verification {
                 this.name = name;
                 this.birthDate = birthDate;
                 this.phoneNumber = phoneNumber;
-                this.status = status;
                 this.verifiedAt = verifiedAt;
-        }
-
-        public void markFailed() {
-                this.status = VerificationStatus.FAILED;
         }
 }
