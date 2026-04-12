@@ -26,10 +26,10 @@ public class Verification {
         @Column(nullable = false, unique = true, length = 100)
         private String verificationId;
 
-        @Column(nullable = false, unique = true, length = 150)
+        @Column(nullable = false, unique = true, length = 100)
         private String identityVerificationId;
 
-        @Column(nullable = false, unique = true, length = 200)
+        @Column(nullable = false, unique = true, length = 100)
         private String ci;
 
         @Column(length = 200)
@@ -38,6 +38,7 @@ public class Verification {
         @Column(nullable = false, length = 50)
         private String name;
 
+        @Column(nullable = false, length = 20)
         private LocalDate birthDate;
 
         @Column(length = 20)

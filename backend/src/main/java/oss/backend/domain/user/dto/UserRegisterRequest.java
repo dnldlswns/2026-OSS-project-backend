@@ -5,7 +5,7 @@ public record UserRegisterRequest(
                 String name,
                 String birthDate,
                 String phoneNumber,
-                String id,
-                String password) {
+                String userId,
+                String userPassword) {
 
 }
