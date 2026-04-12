@@ -1,36 +1,31 @@
 package oss.backend.domain.verification.service;
 
-import static org.mockito.Mockito.mock;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import oss.backend.domain.verification.dto.VerificationCompleteRequest;
-import oss.backend.domain.verification.entity.Verification;
-import oss.backend.domain.verification.repository.VerificationRepository;
+import oss.backend.domain.verification.dto.VerificationCompleteResponse;
 import oss.backend.infra.portone.PortOneClient;
 import oss.backend.infra.portone.dto.PortOneVerificationResponse;
 import oss.backend.infra.portone.dto.PortOneVerifiedCustomer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+@SpringBootTest
+@Transactional
 public class VerificationServiceTest {
-        private PortOneClient portOneClient;
-        private VerificationRepository verificationRepository;
+        @Autowired
         private VerificationService verificationService;
-
-        @BeforeEach
-        void setUp() {
-                portOneClient = mock(PortOneClient.class);
-                verificationRepository = mock(VerificationRepository.class);
-                verificationService = new VerificationService(portOneClient, verificationRepository);
-        }
+        @MockitoBean
+        private PortOneClient portOneClient;
 
         @Test
-        @DisplayName("본인인증 성공")
+        @DisplayName("본인인증 서비스~레포 저장 로직 성공")
         void complete_success() {
                 given(portOneClient.getVerification("identity-verification-123"))
                                 .willReturn(new PortOneVerificationResponse("VERIFIED",
@@ -42,11 +37,8 @@ public class VerificationServiceTest {
                                                                 "2000-01-01",
                                                                 "01012341234",
                                                                 false)));
-                given(verificationRepository.existsByCi("ci-value")).willReturn(false);
-                given(verificationRepository.save(any(Verification.class)))
-                                .willAnswer(invocation -> invocation.getArgument(0));
 
-                var result = verificationService.complete(
+                VerificationCompleteResponse result = verificationService.complete(
                                 new VerificationCompleteRequest("identity-verification-123"));
 
                 assertThat(result.name()).isEqualTo("홍길동");

@@ -11,12 +11,14 @@ import oss.backend.domain.user.dto.UserRegisterRequest;
 import oss.backend.domain.user.dto.UserRegisterResponse;
 import oss.backend.domain.user.entity.User;
 import oss.backend.domain.user.repository.UserRepository;
+import oss.backend.global.response.JwtTokenProvider;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
         private final UserRepository userRepository;
+        private final JwtTokenProvider jwtTokenProvider;
 
         public UserRegisterResponse register(UserRegisterRequest request) {
                 if (userRepository.existsByUserId(request.userId())) {
@@ -48,7 +50,7 @@ public class UserService {
                         throw new IllegalArgumentException("아이디 또는 비밀번호가 올바르지 않습니다.");
                 }
 
-                // TODO : 원래는 토큰이랑 같이, 토큰은 나중에
-                return new UserLoginResponse(user.getName(), user.getVerificationId());
+                String token = jwtTokenProvider.createAccessToken(user);
+                return new UserLoginResponse(token, user.getName(), user.getVerificationId());
         }
 }
