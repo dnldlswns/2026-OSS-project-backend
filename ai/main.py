@@ -15,7 +15,7 @@ app.add_middleware(
 )
 
 ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png", ".docx", ".hwp"]
-MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_FILE_SIZE = 200 * 1024 * 1024
 
 
 @app.get("/")
@@ -74,7 +74,7 @@ async def review_file(file: UploadFile = File(...)):
         reasons.append("파일 크기가 제한 범위 이내입니다.")
     else:
         reasons.append("파일 크기가 너무 큽니다.")
-        suggestions.append("파일 크기를 10MB 이하로 줄여주세요.")
+        suggestions.append("파일 크기를 200MB 이하로 줄여주세요.")
 
     if lower_filename.endswith(".docx"):
         try:
