@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from docx import Document
+from pypdf import PdfReader
 from io import BytesIO
 
 app = FastAPI()
@@ -32,6 +33,18 @@ def extract_text_from_docx(file_bytes):
             paragraphs.append(text)
 
     return "\n".join(paragraphs)
+
+
+def extract_text_from_pdf(file_bytes):
+    reader = PdfReader(BytesIO(file_bytes))
+    pages_text = []
+
+    for page in reader.pages:
+        text = page.extract_text()
+        if text:
+            pages_text.append(text.strip())
+
+    return "\n".join(pages_text)
 
 
 @app.post("/review")
@@ -77,8 +90,22 @@ async def review_file(file: UploadFile = File(...)):
             reasons.append("DOCX 파일 텍스트 추출 중 오류가 발생했습니다.")
             suggestions.append("파일이 손상되었거나 지원되지 않는 DOCX 형식일 수 있습니다.")
 
+    elif lower_filename.endswith(".pdf"):
+        try:
+            extracted_text = extract_text_from_pdf(contents)
+
+            if extracted_text:
+                reasons.append("PDF 파일에서 텍스트를 추출했습니다.")
+            else:
+                reasons.append("PDF 파일에서 추출된 텍스트가 없습니다.")
+                suggestions.append("스캔 이미지형 PDF라면 OCR 기능이 필요할 수 있습니다.")
+
+        except Exception:
+            reasons.append("PDF 파일 텍스트 추출 중 오류가 발생했습니다.")
+            suggestions.append("파일이 손상되었거나 지원되지 않는 PDF 형식일 수 있습니다.")
+
     else:
-        reasons.append("현재 텍스트 추출은 DOCX 파일만 지원합니다.")
+        reasons.append("현재 텍스트 추출은 DOCX, PDF 파일만 지원합니다.")
 
     if "레포트" in filename or "템플릿" in filename:
         reasons.append("파일명이 예술활동 증빙자료보다는 일반 문서 또는 템플릿처럼 보입니다.")
