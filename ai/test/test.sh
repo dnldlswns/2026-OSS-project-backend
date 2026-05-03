@@ -29,7 +29,7 @@ echo ""
 echo "=============================="
 echo " 2. 등록된 스키마 목록 확인"
 echo "=============================="
-curl -s "$BASE/schemas" | python3 -m json.tool
+curl -s "$BASE/schemas" | python3 -m json.tool --no-ensure-ascii
 
 echo ""
 echo "=============================="
@@ -41,5 +41,5 @@ for IMAGE in "$IMAGE_DIR"/*.png; do
   echo ""
   echo "--- $NAME ---"
   curl -s -X POST "$BASE/extract" \
-    -F "file=@$IMAGE" | python3 -m json.tool
+    -F "file=@$IMAGE" | python3 -m json.tool --no-ensure-ascii
 done

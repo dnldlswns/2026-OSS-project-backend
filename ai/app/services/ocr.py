@@ -7,7 +7,7 @@ def _get_reader() -> easyocr.Reader:
     global _reader
     if _reader is None:
         # 최초 호출 시 모델 다운로드 (수 초 소요)
-        _reader = easyocr.Reader(["ko", "en"], gpu=False)
+        _reader = easyocr.Reader(["ko", "en"], gpu=True)
     return _reader
 
 
