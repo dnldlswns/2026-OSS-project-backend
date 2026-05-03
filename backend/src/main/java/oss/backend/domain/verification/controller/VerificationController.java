@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import oss.backend.domain.verification.dto.VerificationCompleteRequest;
 import oss.backend.domain.verification.dto.VerificationCompleteResponse;
 import oss.backend.domain.verification.service.VerificationService;
+import oss.backend.global.response.ApiResponse;
 
 @RestController
 @RequestMapping("/api/verification")
@@ -20,8 +21,8 @@ public class VerificationController {
         private final VerificationService verificationService;
 
         @PostMapping("/complete")
-        public ResponseEntity<VerificationCompleteResponse> complete(
+        public ResponseEntity<ApiResponse<VerificationCompleteResponse>> complete(
                         @Valid @RequestBody VerificationCompleteRequest request) {
-                return ResponseEntity.ok(verificationService.complete(request));
+                return ResponseEntity.ok(ApiResponse.ok(verificationService.complete(request)));
         }
 }

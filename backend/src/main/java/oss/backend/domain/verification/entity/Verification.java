@@ -29,7 +29,7 @@ public class Verification {
         @Column(nullable = false, unique = true, length = 100)
         private String identityVerificationId;
 
-        @Column(nullable = false, unique = true, length = 100)
+        @Column(nullable = false, unique = true, length = 200)
         private String ci;
 
         @Column(length = 200)
