@@ -4,3 +4,8 @@ python-multipart
 pydantic
 pypdf
 python-docx
+easyocr
+opencv-python-headless
+numpy
+httpx
+pillow

@@ -1,0 +1,13 @@
+{
+  "name": "전시 참가 확인서",
+  "description": "전시회 또는 갤러리 참가를 증명하는 문서. 전시명, 기간, 작가명 등을 포함.",
+  "keywords": ["전시", "갤러리", "참가", "확인서", "작가", "출품"],
+  "fields": [
+    {"name": "전시명",   "description": "전시회 이름",             "type": "string", "required": true},
+    {"name": "전시기간", "description": "전시 시작일 ~ 종료일",    "type": "string", "required": true},
+    {"name": "전시장소", "description": "갤러리 또는 전시 공간명", "type": "string", "required": true},
+    {"name": "작가명",   "description": "참가 작가 이름",          "type": "string", "required": true},
+    {"name": "작품수",   "description": "출품 작품 수 (숫자)",     "type": "number", "required": false},
+    {"name": "발급일",   "description": "확인서 발급 날짜",        "type": "date",   "required": false}
+  ]
+}

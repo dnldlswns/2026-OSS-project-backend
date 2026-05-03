@@ -1,0 +1,13 @@
+{
+  "name": "예술 지원금 신청서",
+  "description": "예술 활동 지원금 신청을 위한 문서. 신청자 정보, 활동 계획, 신청 금액 등을 포함.",
+  "keywords": ["지원금", "신청서", "예술", "활동", "사업명", "신청금액"],
+  "fields": [
+    {"name": "신청자명",   "description": "지원금 신청자 이름",            "type": "string", "required": true},
+    {"name": "사업명",     "description": "지원을 신청하는 예술 사업 이름", "type": "string", "required": true},
+    {"name": "신청금액",   "description": "신청하는 지원 금액 (원 단위)",   "type": "number", "required": true},
+    {"name": "활동기간",   "description": "예술 활동 예정 기간",            "type": "string", "required": true},
+    {"name": "활동분야",   "description": "예술 활동 분야 (음악/미술/공연 등)", "type": "string", "required": true},
+    {"name": "신청일",     "description": "신청서 제출 날짜",               "type": "date",   "required": false}
+  ]
+}

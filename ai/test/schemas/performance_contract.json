@@ -1,0 +1,13 @@
+{
+  "name": "공연 출연 계약서",
+  "description": "공연 출연에 관한 계약 문서. 공연명, 출연료, 공연 일시 및 장소 등을 포함.",
+  "keywords": ["계약서", "출연", "공연", "출연료", "갑", "을", "계약"],
+  "fields": [
+    {"name": "공연명",   "description": "공연 또는 작품 제목",            "type": "string", "required": true},
+    {"name": "공연일",   "description": "공연 날짜 (예: 2024년 5월 15일)", "type": "date",   "required": true},
+    {"name": "공연장소", "description": "공연이 열리는 장소명",             "type": "string", "required": true},
+    {"name": "출연료",   "description": "계약된 출연 금액 (원 단위 숫자)",  "type": "number", "required": true},
+    {"name": "계약자명", "description": "을(출연자) 이름",                 "type": "string", "required": true},
+    {"name": "계약일",   "description": "계약 체결 날짜",                  "type": "date",   "required": false}
+  ]
+}
