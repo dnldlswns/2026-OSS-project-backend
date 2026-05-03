@@ -1,4 +1,3 @@
-import numpy as np
 import easyocr
 
 _reader: easyocr.Reader | None = None
@@ -14,6 +13,5 @@ def _get_reader() -> easyocr.Reader:
 
 def ocr(image_bytes: bytes) -> str:
     reader = _get_reader()
-    nparr = np.frombuffer(image_bytes, np.uint8)
-    results = reader.readtext(nparr, detail=0, paragraph=True)
+    results = reader.readtext(image_bytes, detail=0, paragraph=True)
     return "\n".join(results)
