@@ -31,9 +31,10 @@ public class JwtTokenProvider {
                 Instant now = Instant.now();
 
                 return Jwts.builder()
-                                .subject(user.getUserId())
+                                .subject(user.getEmail())
                                 .claim("userPk", user.getId())
-                                .claim("userId", user.getUserId())
+                                .claim("email", user.getEmail())
+                                .claim("role", user.getRole().name())
                                 .issuedAt(Date.from(now))
                                 .expiration(Date.from(now.plusMillis(accessTokenExpirationMs)))
                                 .signWith(key, Jwts.SIG.HS256)
@@ -49,9 +50,15 @@ public class JwtTokenProvider {
                 }
         }
 
-        public String getUserId(String token) {
+        public String getEmail(String token) {
                 Claims claims = Jwts.parser().verifyWith(key).build()
                                 .parseSignedClaims(token).getPayload();
                 return claims.getSubject();
+        }
+
+        public String getRole(String token) {
+                Claims claims = Jwts.parser().verifyWith(key).build()
+                                .parseSignedClaims(token).getPayload();
+                return claims.get("role", String.class);
         }
 }
