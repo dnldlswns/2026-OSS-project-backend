@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from docx import Document
 from io import BytesIO
+import re
 
 app = FastAPI(title="ArtPass AI Server")
 
@@ -67,6 +68,110 @@ def extract_text_from_file(filename: str, content: bytes) -> str:
     return ""
 
 
+def find_value_by_keywords(text: str, keywords: list[str]) -> str:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+
+    for line in lines:
+        for keyword in keywords:
+            if keyword in line:
+                value = line.replace(keyword, "")
+                value = value.replace(":", "")
+                value = value.replace("-", "")
+                value = value.strip()
+
+                if value:
+                    return value
+
+                return line
+
+    return ""
+
+
+def extract_date_range(text: str) -> tuple[str, str]:
+    date_pattern = r"\d{4}[-./년\s]\d{1,2}[-./월\s]\d{1,2}"
+    dates = re.findall(date_pattern, text)
+
+    cleaned_dates = []
+    for date in dates:
+        cleaned = date.replace("년", "-").replace("월", "-").replace("일", "")
+        cleaned = cleaned.replace(".", "-").replace("/", "-").replace(" ", "")
+        cleaned = cleaned.strip("-")
+        cleaned_dates.append(cleaned)
+
+    if len(cleaned_dates) >= 2:
+        return cleaned_dates[0], cleaned_dates[1]
+
+    if len(cleaned_dates) == 1:
+        return cleaned_dates[0], cleaned_dates[0]
+
+    return "", ""
+
+
+def analyze_evidence_text(text: str) -> dict:
+    work_title = find_value_by_keywords(
+        text,
+        ["작품명", "작품 제목", "제목", "공연명", "전시명"]
+    )
+
+    organizer_name = find_value_by_keywords(
+        text,
+        ["주최", "제작", "주관", "기관", "단체명"]
+    )
+
+    applicant_role = find_value_by_keywords(
+        text,
+        ["신청자의 역할", "역할", "참여역할", "담당", "출연", "작가", "연출", "기획"]
+    )
+
+    activity_start_date, activity_end_date = extract_date_range(text)
+
+    field_results = [
+        {
+            "fieldName": "작품명",
+            "value": work_title,
+            "confidence": 0.85 if work_title else 0.0,
+            "status": "PASS" if work_title else "REVIEW",
+            "reason": "작품명 관련 키워드를 통해 값을 추출했습니다." if work_title else "작품명 정보를 찾지 못했습니다."
+        },
+        {
+            "fieldName": "작품 발표일(기간)",
+            "value": f"{activity_start_date} ~ {activity_end_date}" if activity_start_date else "",
+            "confidence": 0.85 if activity_start_date else 0.0,
+            "status": "PASS" if activity_start_date else "REVIEW",
+            "reason": "날짜 형식의 텍스트를 추출했습니다." if activity_start_date else "작품 발표일 또는 기간 정보를 찾지 못했습니다."
+        },
+        {
+            "fieldName": "주최/제작",
+            "value": organizer_name,
+            "confidence": 0.85 if organizer_name else 0.0,
+            "status": "PASS" if organizer_name else "REVIEW",
+            "reason": "주최/제작 관련 키워드를 통해 값을 추출했습니다." if organizer_name else "주최/제작 정보를 찾지 못했습니다."
+        },
+        {
+            "fieldName": "신청자의 역할",
+            "value": applicant_role,
+            "confidence": 0.85 if applicant_role else 0.0,
+            "status": "PASS" if applicant_role else "REVIEW",
+            "reason": "역할 관련 키워드를 통해 값을 추출했습니다." if applicant_role else "신청자의 역할 정보를 찾지 못했습니다."
+        }
+    ]
+
+    pass_count = len([result for result in field_results if result["status"] == "PASS"])
+    score = int((pass_count / len(field_results)) * 100)
+
+    return {
+        "workTitle": work_title,
+        "activityStartDate": activity_start_date,
+        "activityEndDate": activity_end_date,
+        "organizerName": organizer_name,
+        "applicantRole": applicant_role,
+        "fieldResults": field_results,
+        "score": score,
+        "confidence": round(score / 100, 2),
+        "isValid": score >= 50
+    }
+
+
 @app.post("/ai/review")
 async def review_file(file: UploadFile = File(...)):
     filename = file.filename or ""
@@ -77,7 +182,9 @@ async def review_file(file: UploadFile = File(...)):
     is_supported = is_supported_file(file_type, file_size)
     extracted_text = extract_text_from_file(filename, content)
 
-    is_valid = is_supported and bool(extracted_text.strip())
+    analysis_result = analyze_evidence_text(extracted_text)
+
+    is_valid = is_supported and analysis_result["isValid"]
 
     return {
         "status": "success",
@@ -93,18 +200,19 @@ async def review_file(file: UploadFile = File(...)):
             "mainActivityField": "미술(일반)",
             "detailField": "회화",
 
-            "workTitle": "청년 작가 전시회",
-            "activityStartDate": "2025-03-01",
-            "activityEndDate": "2025-03-19",
+            "workTitle": analysis_result["workTitle"],
+            "activityStartDate": analysis_result["activityStartDate"],
+            "activityEndDate": analysis_result["activityEndDate"],
             "organizerType": "주최",
-            "organizerName": "서울아트센터",
-            "applicantRole": "작가",
+            "organizerName": analysis_result["organizerName"],
+            "applicantRole": analysis_result["applicantRole"],
 
-            "evidenceCategory": "작품정보이미지",
+            "evidenceCategory": "증빙자료",
             "extractedText": extracted_text[:1000],
-            "score": 80 if is_valid else 30,
-            "confidence": 0.8 if is_valid else 0.3,
+            "fieldResults": analysis_result["fieldResults"],
+            "score": analysis_result["score"] if is_supported else 0,
+            "confidence": analysis_result["confidence"] if is_supported else 0.0,
             "isValid": is_valid,
-            "reason": "작품명, 발표일, 주최/제작, 신청자 역할, 증빙자료 정보를 기준으로 검토 결과 JSON을 반환했습니다."
+            "reason": "증빙자료 텍스트에서 작품명, 발표일, 주최/제작, 신청자 역할을 키워드 기반으로 분석했습니다."
         }
     }
